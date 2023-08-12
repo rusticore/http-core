@@ -2,5 +2,11 @@
 name = "server-core"
 version = "0.1.0"
 edition = "2021"
+description = "A lightweight server core for Rust"
+categories = ["http-server"]
+keywords = ["core", "server", "http", "minimalist", "lightweight"]
+authors = ["Ando <iamando@tuta.io>"]
+license = "MIT"
+repository = "https://github.com/exprust/server-core"
 
 [dependencies]

@@ -1,7 +1,7 @@
 # Serve Core
 
-![build](https://github.com/iamando/server-core/workflows/build/badge.svg)
-![license](https://img.shields.io/github/license/iamando/server-core?color=success)
+![build](https://github.com/exprust/server-core/workflows/build/badge.svg)
+![license](https://img.shields.io/github/license/exprust/server-core?color=success)
 
 A lightweight server core for Rust
 

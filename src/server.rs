@@ -11,6 +11,10 @@ impl Server {
       panic!("An error occured, parameters need to be not empty");
     }
 
+    if !Params::is_valid_local_host(host) {
+      panic!("An error occured, parameters need to be valid local host");
+    }
+
     addr.push_str(&host);
     addr.push(':');
     addr.push_str(&port.to_string());

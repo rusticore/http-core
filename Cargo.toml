@@ -14,3 +14,4 @@ name = "core"
 path = "src/lib.rs"
 
 [dependencies]
+regex = "1.9.3"

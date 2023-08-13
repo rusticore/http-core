@@ -9,4 +9,8 @@ authors = ["Ando <iamando@tuta.io>"]
 license = "MIT"
 repository = "https://github.com/exprust/core"
 
+[lib]
+name = "core"
+path = "src/lib.rs"
+
 [dependencies]

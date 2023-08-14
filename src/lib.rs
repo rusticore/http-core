@@ -9,6 +9,7 @@ pub mod server {
 
   impl Server {
     pub fn new() {}
+
     pub fn listen(host: &str, port: u32) {
       let mut addr = String::new();
 
@@ -24,20 +25,19 @@ pub mod server {
       addr.push(':');
       addr.push_str(&port.to_string());
 
+      let listener = TcpListener::bind(&addr).expect("An error occured while listening app");
+
       println!("App is listening on {}", &addr);
 
-      match TcpListener::bind(&addr) {
-        Ok(listener) => {
-          for stream in listener.incoming() {
-            match stream {
-              Ok(tcp_stream) => thread::spawn(move || self::Server::handle_connection(tcp_stream)),
-              Err(e) => panic!("{}", e),
-            };
-          }
-        }
-        Err(e) => panic!("{}", e),
+      for stream in listener.incoming() {
+        match stream {
+          Ok(tcp_stream) => thread::spawn(move || self::Server::handle_connection(tcp_stream)),
+          Err(e) => panic!("{}", e),
+        };
       }
     }
+
+    pub fn close() {}
 
     fn handle_connection(mut tcp_stream: TcpStream) {
       loop {

@@ -1,10 +1,16 @@
 pub mod server {
-  use crate::params::Params;
   use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
+    process,
+    sync::{
+      atomic::{AtomicBool, Ordering},
+      Arc,
+    },
     thread,
   };
+
+  use crate::params::Params;
   pub struct Server {}
 
   impl Server {
@@ -26,18 +32,25 @@ pub mod server {
       addr.push_str(&port.to_string());
 
       let listener = TcpListener::bind(&addr).expect("An error occured while listening app");
+      let term = Arc::new(AtomicBool::new(false));
+
+      self::Server::handle_exit_process(Arc::clone(&term).clone());
 
       println!("App is listening on {}", &addr);
 
       for stream in listener.incoming() {
+        if term.load(Ordering::SeqCst) {
+          println!("Exiting thread...");
+
+          break;
+        }
+
         match stream {
           Ok(tcp_stream) => thread::spawn(move || self::Server::handle_connection(tcp_stream)),
           Err(e) => panic!("{}", e),
         };
       }
     }
-
-    pub fn close() {}
 
     fn handle_connection(mut tcp_stream: TcpStream) {
       loop {
@@ -62,6 +75,16 @@ pub mod server {
           }
           Err(e) => panic!("{}", e),
         }
+      }
+    }
+
+    fn handle_exit_process(exit: Arc<AtomicBool>) {
+      if let Err(e) = ctrlc::set_handler(move || {
+        exit.store(true, Ordering::SeqCst);
+        println!("Ctrl + C pressed. Exiting gracefully...");
+        process::exit(0);
+      }) {
+        panic!("{}", e);
       }
     }
   }

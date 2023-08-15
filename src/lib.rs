@@ -21,7 +21,7 @@ pub mod server {
 
     fn initialize(&self) {
       if !self.initialized {
-        panic!("App instance must be initialized using App::new() before calling listen_method()");
+        panic!("Server instance must be initialized using Server::new() before calling listen()");
       }
     }
 

@@ -10,14 +10,24 @@ pub mod server {
 
   use crate::handler::Handler;
   use crate::params::Params;
-  pub struct Server {}
+  pub struct Server {
+    initialized: bool,
+  }
 
   impl Server {
     pub fn new() -> Self {
-      Server {}
+      Server { initialized: true }
     }
 
-    pub fn listen(host: &str, port: u32) {
+    fn initialize(&self) {
+      if !self.initialized {
+        panic!("App instance must be initialized using App::new() before calling listen_method()");
+      }
+    }
+
+    pub fn listen(&self, host: &str, port: u32) {
+      self.initialize();
+
       let mut addr = String::new();
 
       if Params::is_empty(host, port) {

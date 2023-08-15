@@ -1,8 +1,6 @@
 pub mod server {
   use std::{
-    io::{Read, Write},
-    net::{TcpListener, TcpStream},
-    process,
+    net::TcpListener,
     sync::{
       atomic::{AtomicBool, Ordering},
       Arc,
@@ -10,11 +8,14 @@ pub mod server {
     thread,
   };
 
+  use crate::handler::Handler;
   use crate::params::Params;
   pub struct Server {}
 
   impl Server {
-    pub fn new() {}
+    pub fn new() -> Self {
+      Server {}
+    }
 
     pub fn listen(host: &str, port: u32) {
       let mut addr = String::new();
@@ -34,7 +35,7 @@ pub mod server {
       let listener = TcpListener::bind(&addr).expect("An error occured while listening app");
       let term = Arc::new(AtomicBool::new(false));
 
-      self::Server::handle_exit_process(Arc::clone(&term).clone());
+      self::Handler::handle_exit_process(Arc::clone(&term).clone());
 
       println!("App is listening on {}", &addr);
 
@@ -46,13 +47,29 @@ pub mod server {
         }
 
         match stream {
-          Ok(tcp_stream) => thread::spawn(move || self::Server::handle_connection(tcp_stream)),
+          Ok(tcp_stream) => thread::spawn(move || self::Handler::handle_connection(tcp_stream)),
           Err(e) => panic!("{}", e),
         };
       }
     }
+  }
+}
 
-    fn handle_connection(mut tcp_stream: TcpStream) {
+pub mod handler {
+  use std::{
+    io::{Read, Write},
+    net::TcpStream,
+    process,
+    sync::{
+      atomic::{AtomicBool, Ordering},
+      Arc,
+    },
+  };
+
+  pub struct Handler {}
+
+  impl Handler {
+    pub fn handle_connection(mut tcp_stream: TcpStream) {
       loop {
         let mut buffer = [0; 1028];
 
@@ -78,7 +95,7 @@ pub mod server {
       }
     }
 
-    fn handle_exit_process(exit: Arc<AtomicBool>) {
+    pub fn handle_exit_process(exit: Arc<AtomicBool>) {
       if let Err(e) = ctrlc::set_handler(move || {
         exit.store(true, Ordering::SeqCst);
         println!("Ctrl + C pressed. Exiting gracefully...");

@@ -18,4 +18,12 @@ mod params {
 
     assert_eq!(result, true);
   }
+
+  #[test]
+  fn is_valid_port() {
+    let port = 8080;
+    let result = Params::is_valid_port(port);
+
+    assert_eq!(result, true);
+  }
 }

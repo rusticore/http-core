@@ -141,5 +141,14 @@ pub mod params {
         Err(_) => false,
       }
     }
+
+    pub fn is_valid_port(port: u32) -> bool {
+      let pattern = r"^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$";
+
+      match Regex::new(pattern) {
+        Ok(re) => re.is_match(&port.to_string()),
+        Err(_) => false,
+      }
+    }
   }
 }

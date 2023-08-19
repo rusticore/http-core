@@ -109,6 +109,7 @@ pub mod handler {
       if let Err(e) = ctrlc::set_handler(move || {
         exit.store(true, Ordering::SeqCst);
         println!("Ctrl + C pressed. Exiting gracefully...");
+
         process::exit(0);
       }) {
         panic!("{}", e);

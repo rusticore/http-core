@@ -120,6 +120,8 @@ pub mod handler {
 pub mod params {
   use regex::Regex;
 
+  use crate::constant;
+
   pub struct Params {}
 
   impl Params {
@@ -134,7 +136,7 @@ pub mod params {
     }
 
     pub fn is_valid_local_host(host: &str) -> bool {
-      let pattern = r"^(localhost|127\.0\.0\.1)$";
+      let pattern = constant::HOST_REGEX;
 
       match Regex::new(pattern) {
         Ok(re) => re.is_match(host),
@@ -143,7 +145,7 @@ pub mod params {
     }
 
     pub fn is_valid_port(port: u32) -> bool {
-      let pattern = r"^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$";
+      let pattern = constant::PORT_REGEX;
 
       match Regex::new(pattern) {
         Ok(re) => re.is_match(&port.to_string()),
@@ -151,4 +153,9 @@ pub mod params {
       }
     }
   }
+}
+
+pub mod constant {
+  pub const HOST_REGEX: &str = r"^(localhost|127\.0\.0\.1)$";
+  pub const PORT_REGEX: &str = r"^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$";
 }

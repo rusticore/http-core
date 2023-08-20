@@ -38,6 +38,10 @@ pub mod server {
         panic!("An error occured, parameters need to be valid local host");
       }
 
+      if !Params::is_valid_port(port) {
+        panic!("An error occured, parameters need to be valid local port");
+      }
+
       addr.push_str(&host);
       addr.push(':');
       addr.push_str(&port.to_string());

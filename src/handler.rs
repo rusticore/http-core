@@ -21,7 +21,10 @@ impl Handler {
             break;
           }
 
-          router(&buffer[0..stream_count]);
+          let request = &buffer[0..stream_count];
+          router(request);
+
+          println!("{}", Handler::get_request_path(request));
         }
         Err(e) => panic!("{}", e),
       }
@@ -37,5 +40,19 @@ impl Handler {
     }) {
       panic!("{}", e);
     }
+  }
+
+  pub fn get_request_path(request: &[u8]) -> String {
+    let request_str = String::from_utf8_lossy(request);
+    let request_lines: Vec<&str> = request_str.lines().collect();
+
+    let request_path = request_lines
+      .first()
+      .unwrap_or(&"")
+      .split_whitespace()
+      .nth(1)
+      .unwrap_or("");
+
+    request_path.to_owned().to_string()
   }
 }

@@ -1,9 +1,10 @@
 pub mod server {
   use std::{
+    collections::HashMap,
     net::TcpListener,
     sync::{
       atomic::{AtomicBool, Ordering},
-      Arc,
+      Arc, Mutex,
     },
     thread,
   };
@@ -12,17 +13,34 @@ pub mod server {
   use crate::params::Params;
   pub struct Server {
     initialized: bool,
+    routes: Arc<Mutex<HashMap<String, Box<dyn Fn(&[u8]) + Send + Sync>>>>,
   }
 
   impl Server {
     pub fn new() -> Self {
-      Server { initialized: true }
+      Server {
+        initialized: true,
+        routes: Arc::new(Mutex::new(HashMap::new())),
+      }
     }
 
     fn initialize(&self) {
       if !self.initialized {
         panic!("Server instance must be initialized using Server::new() before calling listen()");
       }
+    }
+
+    pub fn routes<F>(&mut self, route: &str, handler: F)
+    where
+      F: Fn(&[u8]) + Send + Sync + 'static,
+    {
+      self.initialize();
+
+      self
+        .routes
+        .lock()
+        .unwrap()
+        .insert(route.to_string(), Box::new(handler));
     }
 
     pub fn listen(&self, host: &str, port: u32) {
@@ -46,12 +64,13 @@ pub mod server {
       addr.push(':');
       addr.push_str(&port.to_string());
 
-      let listener = TcpListener::bind(&addr).expect("An error occured while listening app");
       let term = Arc::new(AtomicBool::new(false));
 
       self::Handler::handle_exit_process(Arc::clone(&term).clone());
 
       println!("App is listening on {}", &addr);
+
+      let listener = TcpListener::bind(&addr).expect("An error occured while listening app");
 
       for stream in listener.incoming() {
         if term.load(Ordering::SeqCst) {
@@ -61,7 +80,18 @@ pub mod server {
         }
 
         match stream {
-          Ok(tcp_stream) => thread::spawn(move || self::Handler::handle_connection(tcp_stream)),
+          Ok(tcp_stream) => {
+            let routes_clone = Arc::clone(&self.routes);
+
+            thread::spawn(move || {
+              let routes_lock = routes_clone.lock().unwrap();
+              let router = routes_lock.get("/").unwrap_or_else(|| {
+                panic!("An error occurred, no handler found for default route");
+              });
+
+              Handler::handle_connection(tcp_stream, router);
+            });
+          }
           Err(e) => panic!("{}", e),
         };
       }
@@ -71,7 +101,7 @@ pub mod server {
 
 pub mod handler {
   use std::{
-    io::{Read, Write},
+    io::Read,
     net::TcpStream,
     process,
     sync::{
@@ -83,7 +113,7 @@ pub mod handler {
   pub struct Handler {}
 
   impl Handler {
-    pub fn handle_connection(mut tcp_stream: TcpStream) {
+    pub fn handle_connection(mut tcp_stream: TcpStream, router: &Box<dyn Fn(&[u8]) + Send + Sync>) {
       loop {
         let mut buffer = [0; 1028];
 
@@ -93,16 +123,7 @@ pub mod handler {
               break;
             }
 
-            // Get buffer request and caller properties
-            match tcp_stream.write_all(&buffer[0..stream_count]) {
-              Ok(()) => Handler::handle_request(&buffer),
-              Err(e) => panic!("{}", e),
-            }
-
-            // Just get Err while writing buffer
-            // if let Err(e) = tcp_stream.write_all(&buffer[0..stream_count]) {
-            //   panic!("{}", e)
-            // }
+            router(&buffer[0..stream_count]);
           }
           Err(e) => panic!("{}", e),
         }
@@ -118,10 +139,6 @@ pub mod handler {
       }) {
         panic!("{}", e);
       }
-    }
-
-    pub fn handle_request(buffer: &[u8; 1028]) {
-      println!("{}", String::from_utf8_lossy(buffer))
     }
   }
 }

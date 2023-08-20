@@ -34,11 +34,11 @@ pub mod server {
         panic!("An error occured, parameters need to be not empty");
       }
 
-      if !Params::is_valid_local_host(host) {
+      if !host.is_empty() && !Params::is_valid_local_host(host) {
         panic!("An error occured, parameters need to be valid local host");
       }
 
-      if !Params::is_valid_port(port) {
+      if !port.to_string().is_empty() && !Params::is_valid_port(port) {
         panic!("An error occured, parameters need to be valid local port");
       }
 
@@ -65,6 +65,10 @@ pub mod server {
           Err(e) => panic!("{}", e),
         };
       }
+    }
+
+    pub fn config(&self) {
+      self.initialize();
     }
   }
 }

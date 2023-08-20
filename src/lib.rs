@@ -66,10 +66,6 @@ pub mod server {
         };
       }
     }
-
-    pub fn config(&self) {
-      self.initialize();
-    }
   }
 }
 
@@ -99,7 +95,7 @@ pub mod handler {
 
             // Get buffer request and caller properties
             match tcp_stream.write_all(&buffer[0..stream_count]) {
-              Ok(()) => println!("{}", String::from_utf8_lossy(&buffer)),
+              Ok(()) => Handler::handle_request(&buffer),
               Err(e) => panic!("{}", e),
             }
 
@@ -122,6 +118,10 @@ pub mod handler {
       }) {
         panic!("{}", e);
       }
+    }
+
+    pub fn handle_request(buffer: &[u8; 1028]) {
+      println!("{}", String::from_utf8_lossy(buffer))
     }
   }
 }

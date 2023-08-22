@@ -39,8 +39,8 @@ fn main() {
     println!("{}", ABOUT_WORLD_HTML);
   }
 
-  server.routes("/", hello_world_handler);
-  server.routes("/about", about_world_handler);
+  server.set_route("/", hello_world_handler);
+  server.set_route("/about", about_world_handler);
 
   server.listen(host, port);
 }

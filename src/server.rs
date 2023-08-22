@@ -29,7 +29,7 @@ impl Server {
     }
   }
 
-  pub fn routes<F>(&mut self, route: &str, handler: F)
+  pub fn set_route<F>(&mut self, route: &str, handler: F)
   where
     F: Fn(&[u8]) + Send + Sync + 'static,
   {

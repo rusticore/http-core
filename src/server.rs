@@ -45,8 +45,6 @@ impl Server {
   pub fn listen(&self, host: &str, port: u32) {
     self.initialize();
 
-    let mut addr = String::new();
-
     if params::is_empty(host, port) {
       panic!("An error occured, parameters need to be not empty");
     }
@@ -59,9 +57,7 @@ impl Server {
       panic!("An error occured, parameters need to be valid local port");
     }
 
-    addr.push_str(&host);
-    addr.push(':');
-    addr.push_str(&port.to_string());
+    let addr = format!("{}:{}", host, port);
 
     let term = Arc::new(AtomicBool::new(false));
 

@@ -24,14 +24,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
-name = "core"
-version = "0.1.0"
-dependencies = [
- "ctrlc",
- "regex",
-]
-
-[[package]]
 name = "ctrlc"
 version = "3.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -39,6 +31,14 @@ checksum = "2a011bbe2c35ce9c1f143b7af6f94f29a167beb4cd1d29e6740ce836f723120e"
 dependencies = [
  "nix",
  "windows-sys",
+]
+
+[[package]]
+name = "http_core"
+version = "0.1.0"
+dependencies = [
+ "ctrlc",
+ "regex",
 ]
 
 [[package]]

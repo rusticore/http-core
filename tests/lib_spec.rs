@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod params {
-  use core::params;
+  use http_core::params;
 
   #[test]
   fn is_empty() {

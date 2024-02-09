@@ -1,4 +1,4 @@
-use core::server::Server;
+use http_core::server::Server;
 
 const HELLO_WORLD_HTML: &str = r#"
   <!DOCTYPE html>

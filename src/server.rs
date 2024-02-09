@@ -34,7 +34,6 @@ impl Server {
     F: Fn(&[u8]) + Send + Sync + 'static,
   {
     self.initialize();
-
     self
       .routes
       .lock()
@@ -44,36 +43,32 @@ impl Server {
 
   pub fn listen(&self, host: &str, port: u32) {
     self.initialize();
-
     validator::validate_host_and_port(host, port);
-
     let addr = format!("{}:{}", host, port);
-
     let term = Arc::new(AtomicBool::new(false));
 
     self::Handler::handle_exit_process(Arc::clone(&term).clone());
 
-    println!("App is listening on {}", &addr);
-
-    let listener = TcpListener::bind(&addr).expect("An error occured while listening app");
+    let listener = TcpListener::bind(&addr).unwrap();
+    match listener.accept() {
+      Ok((_socket, _addr)) => println!("App is listening on {}", &addr),
+      Err(e) => println!("An error occured while listening app with error, {}", e),
+    }
 
     for stream in listener.incoming() {
       if term.load(Ordering::SeqCst) {
         println!("Exiting thread...");
-
         break;
       }
 
       match stream {
         Ok(tcp_stream) => {
           let routes_clone = Arc::clone(&self.routes);
-
           thread::spawn(move || {
             let routes_lock = routes_clone.lock().unwrap();
             let router = routes_lock.get("/").unwrap_or_else(|| {
               panic!("An error occurred, no handler found for default route");
             });
-
             Handler::handle_connection(tcp_stream, router);
           });
         }

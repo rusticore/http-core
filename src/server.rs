@@ -3,6 +3,7 @@ use crate::validator;
 use std::{
   collections::HashMap,
   net::TcpListener,
+  process,
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc, Mutex,
@@ -52,7 +53,10 @@ impl Server {
     let listener = TcpListener::bind(&addr).unwrap();
     match listener.accept() {
       Ok((_socket, _addr)) => println!("App is listening on {}", &addr),
-      Err(e) => println!("An error occured while listening app with error, {}", e),
+      Err(e) => {
+        println!("An error occured while listening app with error, {}", e);
+        process::exit(0);
+      }
     }
 
     for stream in listener.incoming() {
